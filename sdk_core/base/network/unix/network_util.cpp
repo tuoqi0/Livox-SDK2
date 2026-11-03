@@ -171,7 +171,7 @@ socket_t CreateSocket(uint16_t port, bool nonblock, bool reuse_port, bool is_bro
 // }
 
 void CloseSock(int sock) {
-  if (sock > 0) {
+  if (sock >= 0) {
     close(sock);
   }
 }

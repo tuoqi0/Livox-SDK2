@@ -23,6 +23,26 @@ Livox SDK2 communication protocol opens to all users. It is the communication pr
 * [HAP Communication protocol](<https://github.com/Livox-SDK/Livox-SDK2/wiki/Livox-SDK-Communication-Protocol-HAP(English)>) (English)
 
 
+## 在本 ROS 2 工作区中使用
+
+在 `slam_ws` 根目录构建，驱动会链接工作区安装的 SDK；无需另装到 `/usr/local`：
+
+```bash
+colcon build --packages-up-to livox_ros_driver2 --cmake-args -DBUILD_TESTING=ON
+source install/setup.bash
+colcon test --packages-select Livox-SDK2 --ctest-args -R '^test_sdk_(lifecycle|resources)$' --output-on-failure
+colcon test-result --verbose
+```
+
+Linux 离线测试使用已安装 `robot_core` 的 doctest，传输替换为惰性文件描述符，
+不会连接雷达或发送网络数据；SDK 的线程、事件循环、初始化和退出仍使用真实实现。
+`test_sdk_wire_layout` 在构建阶段检查协议结构的尺寸与偏移以及本机配置类型的对齐。
+这些结果不代替实机同步、吞吐量或 SLAM 精度验收。
+
+SDK 初始化与退出须在控制线程串行调用，不要在数据或设备回调中直接退出 SDK。
+初始化返回失败时会清理本次已创建资源；重复退出不会重复关闭先前的文件描述符。
+修改配置后再初始化时，需要重新注册本次回调。下方独立构建方式不启用这些工作区测试。
+
 # 2. Installation
 
 ## 2.1 Prerequisites

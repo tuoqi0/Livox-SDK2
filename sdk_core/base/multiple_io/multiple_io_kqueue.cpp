@@ -53,7 +53,7 @@ bool MultipleIOKqueue::PollCreate(int size) {
 
 void MultipleIOKqueue::PollDestroy() {
   WakeUpUninit();
-  if (kqueue_fd_ > 0) {
+  if (kqueue_fd_ >= 0) {
     close(kqueue_fd_);
     kqueue_fd_ = -1;
   }

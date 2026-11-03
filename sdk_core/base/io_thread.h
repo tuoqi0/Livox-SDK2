@@ -38,6 +38,7 @@ class IOThread : public ThreadBase {
   bool Init(bool enable_timer = true, bool enable_wake = true);
   std::weak_ptr<IOLoop> GetLoop() { return loop_; }
   void ThreadFunc();
+  using ThreadBase::Join;
 
  private:
   void Uninit();

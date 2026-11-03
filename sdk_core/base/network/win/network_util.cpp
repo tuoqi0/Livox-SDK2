@@ -35,7 +35,7 @@ namespace lidar {
 namespace util {
 
 void CloseSock(socket_t sock) {
-  closesocket(sock);
+  if (sock >= 0) closesocket(sock);
 }
 
 socket_t CreateSocket(uint16_t port, bool nonblock, bool reuse_port, bool is_broadcast, std::string netif, const std::string multicast_ip) {

@@ -24,7 +24,6 @@
 
 #include "thread_base.h"
 #include <thread>
-#include <iostream>
 #include <memory>
 
 namespace livox {
@@ -49,12 +48,8 @@ void ThreadBase::Join() {
   quit_ = true;
   if (thread_ && thread_->joinable()) {
     thread_->join();
-    thread_ = nullptr;
-  } else {
-    std::cout << "failed to join thread, joinable: " 
-              << thread_->joinable() << std::endl;
-    thread_ = nullptr;
   }
+  thread_.reset();
 }
 
 } // namespace lidar

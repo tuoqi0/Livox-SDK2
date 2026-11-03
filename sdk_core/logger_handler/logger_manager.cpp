@@ -68,6 +68,7 @@ LoggerManager& LoggerManager::GetInstance() {
 
 bool LoggerManager::Init(std::shared_ptr<LivoxLidarLoggerCfg> lidar_logger_cfg_ptr) {
   is_destroy_.store(false);
+  log_enable_.store(false);
   if (lidar_logger_cfg_ptr == nullptr || 
       lidar_logger_cfg_ptr->lidar_log_enable == false) {
     log_enable_.store(false);
@@ -81,7 +82,6 @@ bool LoggerManager::Init(std::shared_ptr<LivoxLidarLoggerCfg> lidar_logger_cfg_p
   }
 
   comm_port_.reset(new CommPort());
-  log_enable_.store(lidar_logger_cfg_ptr->lidar_log_enable);
 
   // Only 200 MB of exception log space will be allocated.
   if (lidar_logger_cfg_ptr->lidar_log_cache_size > 
@@ -106,6 +106,7 @@ bool LoggerManager::Init(std::shared_ptr<LivoxLidarLoggerCfg> lidar_logger_cfg_p
 
   log_cycle_delete_enable_.store(true);
   cycle_delete_thread_ = std::make_shared<std::thread>(&LoggerManager::CycleDelete, this);
+  log_enable_.store(lidar_logger_cfg_ptr->lidar_log_enable);
 
   return true;
 }
@@ -373,6 +374,8 @@ void LoggerManager::Destory() {
   if (log_enable_.load()) {
     ChangeHiddenFiles(log_root_path_);
   }
+  devices_info_.clear();
+  comm_port_.reset();
   log_enable_.store(false);
   is_destroy_.store(true);
 }

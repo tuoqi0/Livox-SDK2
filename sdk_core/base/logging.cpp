@@ -30,8 +30,9 @@ bool is_console_log_enable = true;
 
 void InitLogger() {
 
-  if (spdlog::get("console") != nullptr) {
-    logger = spdlog::get("console");
+  // SDK logging is owned by this pointer, independently of the application's
+  // spdlog registry. Failure cleanup must not remove application loggers.
+  if (logger) {
     return;
   }
 
@@ -49,11 +50,10 @@ void InitLogger() {
   }
 
   logger = std::make_shared<spdlog::logger>("console", begin(sinkList), end(sinkList));
-  spdlog::register_logger(logger);
   logger->set_level(spdlog::level::debug);
   logger->flush_on(spdlog::level::debug);
 }
 
 void UninitLogger() {
-  spdlog::drop_all();
+  logger.reset();
 }

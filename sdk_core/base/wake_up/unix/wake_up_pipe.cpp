@@ -38,7 +38,7 @@ WakeUpPipe::~WakeUpPipe() {
 bool WakeUpPipe::WakeUp() {
   char ch = '1';
   ssize_t nbytes = sizeof(ch);
-  if (pipe_in_ > 0) {
+  if (pipe_in_ >= 0) {
     if (nbytes != write(pipe_in_, &ch, nbytes)) {
       return false;
     }
@@ -49,7 +49,7 @@ bool WakeUpPipe::WakeUp() {
 bool WakeUpPipe::Drain() {
   char ch[512];
   size_t size = sizeof(ch);
-  if (pipe_out_ > 0) {
+  if (pipe_out_ >= 0) {
     ssize_t ret = read(pipe_out_, ch, size);
     if (ret < 0) {
       return false;
@@ -59,11 +59,13 @@ bool WakeUpPipe::Drain() {
 }
 
 bool WakeUpPipe::PipeDestroy() {
-  if (pipe_in_ > 0) {
+  if (pipe_in_ >= 0) {
     close(pipe_in_);
+    pipe_in_ = -1;
   }
-  if (pipe_out_ > 0) {
+  if (pipe_out_ >= 0) {
     close(pipe_out_);
+    pipe_out_ = -1;
   }
   return true;
 }
@@ -100,10 +102,10 @@ bool WakeUpPipe::PipeCreate() {
   } while(0);
 
   if (!status) {
-    if (filedes[0] > 0) {
+    if (filedes[0] >= 0) {
       close(filedes[0]);
     }
-    if (filedes[1] > 0) {
+    if (filedes[1] >= 0) {
       close(filedes[1]);
     }
     return false;

@@ -30,3 +30,20 @@ install(FILES
   cmake/Livox-SDK2Config.cmake
   cmake/Livox-SDK2ConfigVersion.cmake
   DESTINATION share/Livox-SDK2/cmake)
+
+# Tests use the workspace's existing installed doctest entry. Standalone SDK
+# builds do not acquire a robot_core production dependency.
+if(BUILD_TESTING AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  enable_testing()
+  find_package(robot_core CONFIG REQUIRED)
+  include(${robot_core_DIR}/robot_coreTests.cmake)
+  foreach(contract IN ITEMS lifecycle resources)
+    robot_core_add_test(test_sdk_${contract} test/test_sdk_${contract}.cpp)
+    target_include_directories(test_sdk_${contract} PRIVATE include sdk_core 3rdparty 3rdparty/spdlog)
+    target_link_libraries(test_sdk_${contract} livox_lidar_sdk_shared)
+    set_property(TARGET test_sdk_${contract} APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--export-dynamic")
+    set_tests_properties(test_sdk_${contract} PROPERTIES TIMEOUT 30)
+  endforeach()
+  add_library(test_sdk_wire_layout OBJECT test/test_sdk_wire_layout.cpp)
+  target_include_directories(test_sdk_wire_layout PRIVATE include sdk_core 3rdparty 3rdparty/spdlog)
+endif()

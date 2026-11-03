@@ -38,8 +38,6 @@
 namespace livox {
 namespace lidar {
 
-#pragma pack(1)
-
 const uint16_t KDefaultTimeOut = 1000;
 static const uint32_t kMaxCommandBufferSize = 1400;
 
@@ -130,6 +128,8 @@ typedef enum {
   kLidarSend = 1,
 } SendType;
 
+// Ethernet records keep their byte-exact wire layout.
+#pragma pack(push, 1)
 typedef struct {
   uint8_t ret_code;
   uint8_t dev_type;
@@ -137,6 +137,7 @@ typedef struct {
   uint8_t lidar_ip[4];
   uint16_t cmd_port;
 } DetectionData;
+#pragma pack(pop)
 
 typedef struct {
   uint32_t handle;
@@ -160,6 +161,7 @@ typedef struct {
   uint16_t host_imu_data_port;
 } ViewLidarIpInfo;
 
+#pragma pack(push, 1)
 typedef struct {
   uint8_t server_ipaddr[4];
 } NTPServerIpInfoValue;
@@ -259,6 +261,7 @@ typedef struct {
   uint8_t log_type;
   uint8_t enable;
 } EnableDeviceLoggerRequest;
+#pragma pack(pop)
 
 typedef struct {
   std::string   sn;
@@ -267,6 +270,7 @@ typedef struct {
   std::uint16_t cmd_port;
 } LidarDeviceInfo;
 
+#pragma pack(push, 1)
 typedef struct {
   uint8_t log_type;         // 0
   uint8_t file_index;       // file index
@@ -391,7 +395,7 @@ typedef void(*LivoxLidarRequestFirmwareInfoCallback)(livox_status status,
     uint32_t handle, LivoxLidarRequestFirmwareInfoResponse* response, void* client_data);
 
 
-#pragma pack()
+#pragma pack(pop)
 
 } // namespace lidar
 } // namespace livox

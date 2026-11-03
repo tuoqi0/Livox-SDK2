@@ -96,6 +96,7 @@ class DeviceManager : public IOLoop::IOLoopDelegate {
   DeviceManager& operator=(const DeviceManager& other) = delete;
  public:
   typedef std::chrono::steady_clock::time_point TimePoint;
+  void Stop();
   void Destory();
   ~DeviceManager();
   static DeviceManager& GetInstance();
@@ -182,7 +183,7 @@ class DeviceManager : public IOLoop::IOLoopDelegate {
 
   std::unique_ptr<CommPort> comm_port_;
 
-  std::atomic<bool> is_stop_detection_{false};
+  std::atomic<bool> is_stop_detection_{true};
   std::shared_ptr<std::thread> detection_thread_;
 
   std::mutex lidars_dev_type_mutex_;

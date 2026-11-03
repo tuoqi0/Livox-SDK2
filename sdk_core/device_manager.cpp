@@ -48,13 +48,13 @@ DeviceManager::DeviceManager()
       lidars_cfg_ptr_(nullptr),
       custom_lidars_cfg_ptr_(nullptr),
       lidar_logger_cfg_ptr_(nullptr),
-      detection_socket_(0),
-      detection_broadcast_socket_(0),
+      detection_socket_(-1),
+      detection_broadcast_socket_(-1),
       cmd_io_thread_(nullptr),
       data_io_thread_(nullptr),
       detection_io_thread_(nullptr),
       comm_port_(nullptr),
-      is_stop_detection_(false),
+      is_stop_detection_(true),
       detection_thread_(nullptr),
       is_view_(false),
       detection_host_ip_(""),
@@ -108,8 +108,8 @@ bool DeviceManager::Init(const std::string& host_ip, const LivoxLidarLoggerCfgIn
     return false;
   }
 
-  detection_thread_ = std::make_shared<std::thread>(&DeviceManager::DetectionLidars, this);
   is_stop_detection_.store(false);
+  detection_thread_ = std::make_shared<std::thread>(&DeviceManager::DetectionLidars, this);
   return true;
 }
 
@@ -171,8 +171,8 @@ bool DeviceManager::Init(std::shared_ptr<std::vector<LivoxLidarCfg>>& lidars_cfg
   }
 
   if (!(lidars_cfg_ptr_->empty()) || !(custom_lidars_cfg_ptr->empty())) {
-    detection_thread_ = std::make_shared<std::thread>(&DeviceManager::DetectionLidars, this);
     is_stop_detection_.store(false);
+    detection_thread_ = std::make_shared<std::thread>(&DeviceManager::DetectionLidars, this);
   }
 
   LOG_INFO("Init livox lidars succ.");
@@ -816,68 +816,37 @@ bool DeviceManager::GetLoggerCmdChannel(const uint8_t dev_type, const uint32_t h
   return false;
 }
 
-void DeviceManager::Destory() {
-  detection_host_ip_ = "";
-
-  if (detection_socket_ > 0) {
-    detection_io_thread_->GetLoop().lock()->RemoveDelegate(detection_socket_, this);
-  }
-
-  if (detection_broadcast_socket_ > 0) {
-    detection_io_thread_->GetLoop().lock()->RemoveDelegate(detection_broadcast_socket_, this);
-  }
-
-  for (auto it = command_channel_.begin(); it != command_channel_.end(); ++it) {
-    socket_t sock = *it;
-    if (sock > 0) {
-      cmd_io_thread_->GetLoop().lock()->RemoveDelegate(sock, this);
-    }
-  }
-
-  for (auto it = vec_broadcast_socket_.begin(); it != vec_broadcast_socket_.end(); ++it) {
-    socket_t sock = *it;
-    if (sock > 0) {
-      cmd_io_thread_->GetLoop().lock()->RemoveDelegate(sock, this);
-    }
-  }
-  
-  for (auto it = data_channel_.begin(); it != data_channel_.end(); ++it) {
-    socket_t sock = *it;
-    if (sock > 0) {
-      data_io_thread_->GetLoop().lock()->RemoveDelegate(sock, this);
-    }
-  }
-
-  for (socket_t& sock : socket_vec_) {
-    util::CloseSock(sock);
-    sock = -1;
-  }
-  socket_vec_.clear();
-
-  for (socket_t & sock : vec_broadcast_socket_) {
-    util::CloseSock(sock);
-    sock = -1;
-  }
-  vec_broadcast_socket_.clear();
-
+void DeviceManager::Stop() {
+  is_stop_detection_.store(true);
   if (detection_thread_) {
-    is_stop_detection_.store(true);
     detection_thread_->join();
-    detection_thread_ = nullptr;
-
-    if (detection_socket_ > 0) {
-      util::CloseSock(detection_socket_);
-      detection_socket_ = -1;
-    }
-
-    if (detection_broadcast_socket_ > 0) {
-      util::CloseSock(detection_broadcast_socket_);
-      detection_broadcast_socket_ = -1;
-    }
+    detection_thread_.reset();
   }
+  // Keep all loops and channels alive until every callback has returned.
+  if (detection_io_thread_) detection_io_thread_->Join();
+  if (cmd_io_thread_) cmd_io_thread_->Join();
+  if (data_io_thread_) data_io_thread_->Join();
+}
+
+void DeviceManager::Destory() {
+  this->Stop();
+  detection_io_thread_.reset();
+  cmd_io_thread_.reset();
+  data_io_thread_.reset();
+
+  for (socket_t sock : socket_vec_) util::CloseSock(sock);
+  socket_vec_.clear();
+  for (socket_t sock : vec_broadcast_socket_) util::CloseSock(sock);
+  vec_broadcast_socket_.clear();
+  util::CloseSock(detection_socket_);
+  detection_socket_ = -1;
+  util::CloseSock(detection_broadcast_socket_);
+  detection_broadcast_socket_ = -1;
 
   lidars_cfg_ptr_ = nullptr;
   custom_lidars_cfg_ptr_ = nullptr;
+  lidar_logger_cfg_ptr_.reset();
+  sdk_framework_cfg_ptr_.reset();
 
   type_lidars_cfg_map_.clear();
   custom_lidars_cfg_map_.clear();

@@ -10,6 +10,7 @@
   <maintainer email="none@example.com">workspace</maintainer>
   <license>MIT</license>
   <buildtool_depend>cmake</buildtool_depend>
+  <test_depend>robot_core</test_depend>
   <export>
     <build_type>cmake</build_type>
   </export>

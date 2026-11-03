@@ -49,7 +49,7 @@ bool MultipleIOEpoll::PollCreate(int size) {
 
 void MultipleIOEpoll::PollDestroy() {
   WakeUpUninit();
-  if (epoll_fd_ > 0) {
+  if (epoll_fd_ >= 0) {
     close(epoll_fd_);
     epoll_fd_ = -1;
   }

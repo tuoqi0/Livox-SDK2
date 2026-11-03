@@ -51,6 +51,7 @@ class DebugPointCloudManager {
   void AddDevice(const uint32_t handle, const DetectionData* detection_data);
   void Handler(uint32_t handle, uint16_t lidar_port, uint8_t *buf, uint32_t buf_size);
   bool Enable(bool enable);
+  void Destory();
   bool SetStorePath(std::string path);
   
   static DebugPointCloudManager& GetInstance();

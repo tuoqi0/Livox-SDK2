@@ -57,6 +57,12 @@ bool DebugPointCloudManager::Enable(bool enable) {
   return true;
 }
 
+void DebugPointCloudManager::Destory() {
+  this->Enable(false);
+  devices_info_.clear();
+  path_.clear();
+}
+
 bool DebugPointCloudManager::SetStorePath(std::string path) {
   if (path.back() == '/') path.pop_back();
   path_ = path;

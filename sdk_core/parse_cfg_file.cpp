@@ -22,6 +22,9 @@
 // SOFTWARE.
 //
 #include "parse_cfg_file.h"
+
+#include <cstdio>
+#include <memory>
 #include "base/logging.h"
 
 #include <map>
@@ -45,17 +48,16 @@ bool ParseCfgFile::Parse(std::shared_ptr<std::vector<LivoxLidarCfg>>& lidars_cfg
                          std::shared_ptr<std::vector<LivoxLidarCfg>>& custom_lidars_cfg_ptr,
                          std::shared_ptr<LivoxLidarLoggerCfg>& lidar_logger_cfg_ptr,
                          std::shared_ptr<LivoxLidarSdkFrameworkCfg>& sdk_framework_cfg_ptr) {
-  FILE* raw_file = std::fopen(path_.c_str(), "rb");
-  if (!raw_file) {
+  std::unique_ptr<FILE, decltype(&std::fclose)> file(
+      std::fopen(path_.c_str(), "rb"), std::fclose);
+  if (!file) {
     LOG_INFO("Parse lidar config failed, can not open json config file!");
+    return false;
   }
   char read_buffer[32768];
-  rapidjson::FileReadStream config_file(raw_file, read_buffer, sizeof(read_buffer));  
+  rapidjson::FileReadStream config_file(file.get(), read_buffer, sizeof(read_buffer));  
   rapidjson::Document doc;
   if (doc.ParseStream(config_file).HasParseError()) {
-    if (raw_file) {
-      std::fclose(raw_file);
-    }
     LOG_ERROR("Parse lidar config failed, parse the config file has error!");
     return false;
   }
@@ -75,9 +77,6 @@ bool ParseCfgFile::Parse(std::shared_ptr<std::vector<LivoxLidarCfg>>& lidars_cfg
       }
     } else {
       LOG_ERROR("set master/slave sdk error");
-      if (raw_file) {
-        std::fclose(raw_file);
-      }
       return false;
     }
   } else {
@@ -90,9 +89,6 @@ bool ParseCfgFile::Parse(std::shared_ptr<std::vector<LivoxLidarCfg>>& lidars_cfg
       lidar_logger_cfg_ptr->lidar_log_enable = doc["lidar_log_enable"].GetBool();
     } else {
       LOG_ERROR("Lidar log enable data type is error");
-      if (raw_file) {
-        std::fclose(raw_file);
-      }
       return false;
     }
 
@@ -100,9 +96,6 @@ bool ParseCfgFile::Parse(std::shared_ptr<std::vector<LivoxLidarCfg>>& lidars_cfg
       lidar_logger_cfg_ptr->lidar_log_cache_size = doc["lidar_log_cache_size_MB"].GetUint();
     } else {
       LOG_ERROR("Parse json file failed, has not lidar_log_cache_size_MB member or lidar_log_cache_size_MB is uint");
-      if (raw_file) {
-        std::fclose(raw_file);
-      }
       return false;
     }
 
@@ -110,9 +103,6 @@ bool ParseCfgFile::Parse(std::shared_ptr<std::vector<LivoxLidarCfg>>& lidars_cfg
       lidar_logger_cfg_ptr->lidar_log_path = doc["lidar_log_path"].GetString();
     } else {
       LOG_ERROR("Parse json file failed, has not lidar_log_path member or lidar_log_path is uint");
-      if (raw_file) {
-        std::fclose(raw_file);
-      }
       return false;
     }
     LOG_INFO("Lidar log cfg, lidar_log_enable:{}, lidar_log_cache_size_MB:{}, lidar_log_path:{}",
@@ -134,9 +124,6 @@ bool ParseCfgFile::Parse(std::shared_ptr<std::vector<LivoxLidarCfg>>& lidars_cfg
     const rapidjson::Value &object = doc["HAP"];
 
     if (!ParseLidarCfg(object, device_type, lidars_cfg_ptr, custom_lidars_cfg_ptr)) {
-      if (raw_file) {
-        std::fclose(raw_file);
-      }
       return false;
     }
   }
@@ -146,9 +133,6 @@ bool ParseCfgFile::Parse(std::shared_ptr<std::vector<LivoxLidarCfg>>& lidars_cfg
     const rapidjson::Value &object = doc["MID360"];
 
     if (!ParseLidarCfg(object, device_type, lidars_cfg_ptr, custom_lidars_cfg_ptr)) {
-      if (raw_file) {
-        std::fclose(raw_file);
-      }
       return false;
     }
   }
@@ -159,9 +143,6 @@ bool ParseCfgFile::Parse(std::shared_ptr<std::vector<LivoxLidarCfg>>& lidars_cfg
       const rapidjson::Value &object = doc["Mid360s"];
 
       if (!ParseLidarCfg(object, device_type, lidars_cfg_ptr, custom_lidars_cfg_ptr)) {
-        if (raw_file) {
-          std::fclose(raw_file);
-      }
       return false;
     }
   }
@@ -171,16 +152,8 @@ bool ParseCfgFile::Parse(std::shared_ptr<std::vector<LivoxLidarCfg>>& lidars_cfg
       const rapidjson::Value &object = doc["Avia2"];
 
       if (!ParseLidarCfg(object, device_type, lidars_cfg_ptr, custom_lidars_cfg_ptr)) {
-        if (raw_file) {
-          std::fclose(raw_file);
-      }
       return false;
     }
-  }
-
-
-  if (raw_file) {
-    std::fclose(raw_file);
   }
   return true;
 }

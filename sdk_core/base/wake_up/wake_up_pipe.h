@@ -30,7 +30,7 @@ namespace lidar {
 
 class WakeUpPipe {
  public:
-  WakeUpPipe(): pipe_in_(0), pipe_out_(0) {}
+  WakeUpPipe(): pipe_in_(-1), pipe_out_(-1) {}
   virtual ~WakeUpPipe();
   bool PipeCreate();
   bool PipeDestroy();

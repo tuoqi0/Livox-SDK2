@@ -40,7 +40,7 @@ WakeUpPipe::~WakeUpPipe() {
 bool WakeUpPipe::WakeUp() {
   char ch = '1';
   size_t nbytes = sizeof(ch);
-  if (pipe_in_ > 0) {
+  if (pipe_in_ >= 0) {
     if (nbytes != send(pipe_in_,&ch, nbytes, 0)) {
       return false;
     }
@@ -51,18 +51,20 @@ bool WakeUpPipe::WakeUp() {
 bool WakeUpPipe::Drain() {
   char ch[512];
   size_t size = sizeof(ch);
-  if (pipe_out_ > 0) {
+  if (pipe_out_ >= 0) {
     recv(pipe_out_, ch, size, 0);
   }
   return true;
 }
 
 bool WakeUpPipe::PipeDestroy() {
-  if (pipe_in_ > 0) {
+  if (pipe_in_ >= 0) {
     closesocket(pipe_in_);
+    pipe_in_ = -1;
   }
-  if (pipe_out_ > 0) {
+  if (pipe_out_ >= 0) {
     closesocket(pipe_out_);
+    pipe_out_ = -1;
   }
   return true;
 }
@@ -120,9 +122,7 @@ bool WakeUpPipe::PipeCreate() {
 
   closesocket(listen_sock);
   if (!status) {
-    if (pipe_in_ > 0) {
-      closesocket(pipe_in_);
-    }
+    PipeDestroy();
     return false;
   }
   return true;
