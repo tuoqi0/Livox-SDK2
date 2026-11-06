@@ -25,13 +25,50 @@
 #include "data_handler.h"
 #include <base/logging.h>
 
+#include <atomic>
+#include <cstddef>
+
 #include "livox_lidar_def.h"
 
 namespace livox {
 
 namespace lidar {
 
-static const size_t kPrefixDataSize = 18;
+namespace {
+
+constexpr std::size_t kPacketHeaderSize = offsetof(LivoxLidarEthernetPacket, data);
+
+std::size_t PointSizeForDataType(const uint8_t data_type) {
+  switch (data_type) {
+    case kLivoxLidarImuData:
+      return sizeof(LivoxLidarImuRawPoint);
+    case kLivoxLidarCartesianCoordinateHighData:
+      return sizeof(LivoxLidarCartesianHighRawPoint);
+    case kLivoxLidarCartesianCoordinateLowData:
+      return sizeof(LivoxLidarCartesianLowRawPoint);
+    case kLivoxLidarSphericalCoordinateData:
+      return sizeof(LivoxLidarSpherPoint);
+    case kLivoxLidarDoubleEchoData:
+      return sizeof(LivoxLidarDoubleEchoRawPoint);
+    default:
+      return 0;
+  }
+}
+
+bool IsPacketLayoutValid(const uint8_t * buffer, const uint32_t buffer_size) {
+  if (buffer == nullptr || buffer_size < kPacketHeaderSize) return false;
+  const auto * packet = reinterpret_cast<const LivoxLidarEthernetPacket *>(buffer);
+  if (packet->length < kPacketHeaderSize || packet->length > buffer_size) return false;
+
+  const std::size_t point_size = PointSizeForDataType(packet->data_type);
+  if (point_size == 0) return false;
+  const std::size_t payload_size = packet->length - kPacketHeaderSize;
+  if (packet->data_type == kLivoxLidarImuData) return payload_size >= point_size;
+  if (packet->dot_num == 0) return false;
+  return static_cast<std::size_t>(packet->dot_num) <= payload_size / point_size;
+}
+
+}  // namespace
 
 DataHandler::DataHandler()
     : point_data_callbacks_(nullptr),
@@ -67,11 +104,23 @@ DataHandler::~DataHandler() {
 
 
 void DataHandler::Handle(const uint8_t dev_type, const uint32_t handle, uint8_t *buf, uint32_t buf_size) {
-  LivoxLidarEthernetPacket *lidar_data = (LivoxLidarEthernetPacket *)buf;
-  if (lidar_data == NULL) {
+  if (!IsPacketLayoutValid(buf, buf_size)) {
+    static std::atomic<std::uint64_t> invalid_packets{0};
+    const std::uint64_t count = ++invalid_packets;
+    if (count == 1 || count % 1000 == 0) {
+      const auto * packet = buf != nullptr && buf_size >= kPacketHeaderSize
+                                ? reinterpret_cast<const LivoxLidarEthernetPacket *>(buf)
+                                : nullptr;
+      LOG_WARN(
+        "Drop malformed lidar packet: buffer={} length={} type={} dots={}",
+        buf_size, packet != nullptr ? packet->length : 0,
+        packet != nullptr ? packet->data_type : 0,
+        packet != nullptr ? packet->dot_num : 0);
+    }
     return;
   }
 
+  LivoxLidarEthernetPacket *lidar_data = (LivoxLidarEthernetPacket *)buf;
   if (lidar_data->data_type == kLivoxLidarImuData) {
     if (imu_data_callbacks_) {
       imu_data_callbacks_(handle, dev_type, lidar_data, imu_client_data_);
