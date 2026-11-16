@@ -23,7 +23,6 @@
 //
 
 #include "upgrade_manager.h"
-#include <thread>
 
 namespace livox {
 namespace lidar {
