@@ -19,17 +19,4 @@ SDK 核心由 `sdk_core/` 编译，驱动通过 `find_package(Livox-SDK2)` 使�
 [`../livox_ros_driver2/README.md`](../livox_ros_driver2/README.md)。
 
 ## 验证
-
-SDK 的生命周期、资源清理和协议包边界测试使用真实核心实现，但不连接雷达：
-
-```bash
-colcon build --base-paths src --packages-select Livox-SDK2 \
-  --cmake-args -DBUILD_TESTING=ON
-source install/setup.bash
-colcon test --packages-select Livox-SDK2 --event-handlers console_direct+
-colcon test-result --verbose
-```
-
-`test_sdk_lifecycle`、`test_sdk_resources` 和 `test_sdk_packet_validation` 覆盖初始化失败、
-重复退出、线程/句柄清理和坏包边界；`test_sdk_wire_layout.cpp` 只作为编译期协议布局
-合同，不注册独立测试。它们不代替实机吞吐、时间同步或 SLAM 精度验收。
+SDK 核心通过独立静态/共享库构建验证；驱动与 Keel 的 ROS 链路由工作区级测试负责。
