@@ -124,12 +124,12 @@ class MessageCallback : public CommandCallback {
 };
 
 template <class ResponseType>
-class BoostFunctionMessageCallback : public CommandCallback {
+class FunctionMessageCallback : public CommandCallback {
  public:
   typedef std::function<void(livox_status, uint8_t, ResponseType *)> Fn;
 
  public:
-  BoostFunctionMessageCallback(const Fn &func) : func_(func) {}
+  FunctionMessageCallback(const Fn &func) : func_(func) {}
   void operator()(livox_status status, uint32_t handle, void *data) {
     if (func_) {
       func_(status, handle, static_cast<ResponseType *>(data));
@@ -147,8 +147,8 @@ std::shared_ptr<CommandCallback> MakeMessageCallback(typename MessageCallback<T>
 }
 
 template <class T>
-std::shared_ptr<CommandCallback> MakeMessageCallback(typename BoostFunctionMessageCallback<T>::Fn func) {
-  std::shared_ptr<CommandCallback> cb(new BoostFunctionMessageCallback<T>(func));
+std::shared_ptr<CommandCallback> MakeMessageCallback(typename FunctionMessageCallback<T>::Fn func) {
+  std::shared_ptr<CommandCallback> cb(new FunctionMessageCallback<T>(func));
   return cb;
 }
 
@@ -178,10 +178,10 @@ std::shared_ptr<CommandCallback> MakeMemberMessageCallback(
 }
 
 template <class ResponseType>
-class BoostFunctionCallback : public CommandCallback {
+class FunctionCallback : public CommandCallback {
  public:
   typedef std::function<void(uint8_t, uint8_t, ResponseType *)> Fn;
-  BoostFunctionCallback(const Fn &func) : func_(func) {}
+  FunctionCallback(const Fn &func) : func_(func) {}
   void operator()(livox_status status,uint32_t handle, void *data) {
     if (func_) {
       if (data == NULL) {
@@ -197,10 +197,10 @@ class BoostFunctionCallback : public CommandCallback {
 };
 
 template <>
-class BoostFunctionCallback<uint8_t> : public CommandCallback {
+class FunctionCallback<uint8_t> : public CommandCallback {
  public:
   typedef std::function<void(uint8_t, uint8_t, uint8_t)> Fn;
-  BoostFunctionCallback(const Fn &func) : func_(func) {}
+  FunctionCallback(const Fn &func) : func_(func) {}
   void operator()(livox_status status,uint32_t handle, void *data) {
     if (func_) {
       if (data == NULL) {
@@ -216,8 +216,8 @@ class BoostFunctionCallback<uint8_t> : public CommandCallback {
 };
 
 template <class ResponseType>
-std::shared_ptr<CommandCallback> MakeCommandCallback(const typename BoostFunctionCallback<ResponseType>::Fn &func) {
-  std::shared_ptr<CommandCallback> cb(new BoostFunctionCallback<ResponseType>(func));
+std::shared_ptr<CommandCallback> MakeCommandCallback(const typename FunctionCallback<ResponseType>::Fn &func) {
+  std::shared_ptr<CommandCallback> cb(new FunctionCallback<ResponseType>(func));
   return cb;
 }
 
