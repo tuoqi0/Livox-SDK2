@@ -10,7 +10,6 @@
   <maintainer email="871609336@qq.com">Qi Tuo</maintainer>
   <license>Proprietary</license>
   <buildtool_depend>cmake</buildtool_depend>
-  <test_depend>robot_core</test_depend>
   <export>
     <build_type>cmake</build_type>
   </export>
