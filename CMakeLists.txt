@@ -17,12 +17,6 @@ if (UNIX)
 endif(UNIX)
 
 add_subdirectory(sdk_core)
-# Samples are standalone executables that pull in extra dependencies and are
-# not used by the driver; off by default so a workspace build stays quiet.
-option(LIVOX_SDK2_BUILD_SAMPLES "Build the SDK sample programs" OFF)
-if(LIVOX_SDK2_BUILD_SAMPLES)
-  add_subdirectory(samples)
-endif()
 
 # Export a CMake package config so dependents (and colcon) can locate this
 # build instead of a system-wide install. Added for the workspace build.

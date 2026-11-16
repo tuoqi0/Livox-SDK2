@@ -7,8 +7,8 @@
     workspace ships rather than whatever happens to sit in /usr/local/lib.
     Added for colcon; not present upstream, so it will not conflict on merge.
   </description>
-  <maintainer email="none@example.com">workspace</maintainer>
-  <license>MIT</license>
+  <maintainer email="871609336@qq.com">Qi Tuo</maintainer>
+  <license>Proprietary</license>
   <buildtool_depend>cmake</buildtool_depend>
   <test_depend>robot_core</test_depend>
   <export>
