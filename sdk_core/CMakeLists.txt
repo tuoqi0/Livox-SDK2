@@ -69,7 +69,6 @@ set(MAIN_SOURCES
         livox_lidar_sdk.cpp
         params_check.cpp
         parse_cfg_file.cpp
-        upgrade_manager.cpp
         )
 set(BASE_SOURCES
         base/io_loop.cpp
