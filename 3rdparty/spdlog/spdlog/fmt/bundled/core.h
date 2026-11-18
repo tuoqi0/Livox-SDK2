@@ -1,9 +1,3 @@
-// Formatting library for C++ - the core API
-//
-// Copyright (c) 2012 - present, Victor Zverovich
-// All rights reserved.
-//
-// For the license information refer to format.h.
 
 #ifndef FMT_CORE_H_
 #define FMT_CORE_H_

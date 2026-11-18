@@ -1,7 +1,3 @@
-//
-// Copyright(c) 2018 Gabi Melman.
-// Distributed under the MIT License (http://opensource.org/licenses/MIT)
-//
 
 // cirucal q view of std::vector.
 #pragma once

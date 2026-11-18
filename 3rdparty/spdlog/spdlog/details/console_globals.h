@@ -1,8 +1,5 @@
 #pragma once
-//
-// Copyright(c) 2018 Gabi Melman.
-// Distributed under the MIT License (http://opensource.org/licenses/MIT)
-//
+
 
 #include "spdlog/details/null_mutex.h"
 #include <cstdio>

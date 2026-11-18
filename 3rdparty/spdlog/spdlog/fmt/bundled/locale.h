@@ -1,9 +1,3 @@
-// Formatting library for C++ - std::locale support
-//
-// Copyright (c) 2012 - present, Victor Zverovich
-// All rights reserved.
-//
-// For the license information refer to format.h.
 
 #ifndef FMT_LOCALE_H_
 #define FMT_LOCALE_H_

@@ -1,7 +1,3 @@
-//
-// Copyright(c) 2016 Alexander Dalshov.
-// Distributed under the MIT License (http://opensource.org/licenses/MIT)
-//
 
 #pragma once
 

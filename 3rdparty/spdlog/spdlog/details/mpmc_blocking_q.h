@@ -1,9 +1,5 @@
 #pragma once
 
-//
-// Copyright(c) 2018 Gabi Melman.
-// Distributed under the MIT License (http://opensource.org/licenses/MIT)
-//
 
 // multi producer-multi consumer blocking queue.
 // enqueue(..) - will block until room found to put the new message.

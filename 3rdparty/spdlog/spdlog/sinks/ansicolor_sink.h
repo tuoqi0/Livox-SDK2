@@ -1,7 +1,3 @@
-//
-// Copyright(c) 2017 spdlog authors.
-// Distributed under the MIT License (http://opensource.org/licenses/MIT)
-//
 
 #pragma once
 

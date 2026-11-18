@@ -1,9 +1,3 @@
-// Formatting library for C++ - color support
-//
-// Copyright (c) 2018 - present, Victor Zverovich and fmt contributors
-// All rights reserved.
-//
-// For the license information refer to format.h.
 
 #ifndef FMT_COLOR_H_
 #define FMT_COLOR_H_
