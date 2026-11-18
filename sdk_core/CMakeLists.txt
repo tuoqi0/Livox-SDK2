@@ -142,3 +142,7 @@ install(TARGETS ${SDK_LIBRARY_STATIC} ${SDK_LIBRARY_SHARED}
         PUBLIC_HEADER DESTINATION include
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib)
+
+# RapidJSON is part of the SDK's installed parser surface. The ROS driver
+# consumes this single copy instead of carrying a duplicate private tree.
+install(DIRECTORY ../3rdparty/rapidjson DESTINATION include)
