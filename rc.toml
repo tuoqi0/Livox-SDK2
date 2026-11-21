@@ -1,5 +1,27 @@
 # Linux SDK variants follow sdk_core/CMakeLists.txt.
 
+default = ["livox_sdk2_package"]
+
+[targets.livox_sdk2_package]
+kind = "interface"
+deps = ["livox_lidar_sdk_shared", "livox_lidar_sdk_static"]
+install = true
+
+[targets.livox_sdk2_package.install_files]
+"cmake/Livox-SDK2ConfigVersion.cmake" = "share/Livox-SDK2/cmake/Livox-SDK2ConfigVersion.cmake"
+
+[targets.livox_sdk2_package.cmake]
+directory = "share/Livox-SDK2/cmake"
+config = "cmake/Livox-SDK2Config.cmake.in"
+
+[targets.livox_sdk2_package.cmake.exports."Livox-SDK2Targets.cmake"."livox_sdk2::shared"]
+target = "livox_lidar_sdk_shared"
+include_dirs = ["include"]
+
+[targets.livox_sdk2_package.cmake.exports."Livox-SDK2Targets.cmake"."livox_sdk2::static"]
+target = "livox_lidar_sdk_static"
+include_dirs = ["include"]
+
 [targets.livox_lidar_sdk_static]
 kind = "static"
 std = "gnu++11"
@@ -48,6 +70,7 @@ header_exports = { "3rdparty/rapidjson" = "rapidjson" }
 compile_options = ["-pthread", "-Wall"]
 link_options = ["-pthread"]
 install = true
+install_deps = ["livox_sdk2_package"]
 
 [targets.livox_lidar_sdk_shared]
 kind = "shared"
@@ -97,6 +120,7 @@ header_exports = { "3rdparty/rapidjson" = "rapidjson" }
 compile_options = ["-pthread", "-Wall"]
 link_options = ["-pthread"]
 install = true
+install_deps = ["livox_sdk2_package"]
 
 [targets.livox_sdk_rapidjson]
 kind = "interface"
